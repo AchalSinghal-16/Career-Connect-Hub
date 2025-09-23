@@ -156,3 +156,6 @@ const ProfilePage = ({ user, onUpdateProfile, onNavigate }) => {
 };
 
 export default ProfilePage;
+
+
+//test line

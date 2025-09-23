@@ -28,3 +28,6 @@ export const getInitials = (name) => {
     const initials = names.map(n => n[0]).join('');
     return initials.toUpperCase();
 };
+
+
+//test line

@@ -20,4 +20,3 @@ const ApplicantCard = ({ applicant, onView }) => (
 );
 export default ApplicantCard;
 
-// Test line

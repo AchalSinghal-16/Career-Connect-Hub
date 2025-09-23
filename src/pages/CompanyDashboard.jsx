@@ -80,3 +80,6 @@ const CompanyDashboard = ({ user, jobs, onLogout, onViewApplicant, onPostJob, on
     );
 };
 export default CompanyDashboard;
+
+
+//test line

@@ -117,3 +117,6 @@ const MyApplicationsPage = ({ user, jobs, onNavigate, onWithdraw }) => {
 };
 
 export default MyApplicationsPage;
+
+
+//test line
