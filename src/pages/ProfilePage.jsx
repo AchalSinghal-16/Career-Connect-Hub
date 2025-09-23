@@ -1,24 +1,13 @@
 import React, { useState } from 'react';
 
-const ProfilePage = ({ user, onUpdateProfile, onNavigate }) => {
+const ProfilePage = ({ user, jobs, onUpdateProfile, onNavigate, onAnalyzeResume }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState(user.profile);
+    const [selectedJobId, setSelectedJobId] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    // A helper for nested objects if needed in the future
-    const handleNestedChange = (section, e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [section]: {
-                ...prev[section],
-                [name]: value,
-            }
-        }));
     };
 
     const handleSave = () => {
@@ -26,130 +15,115 @@ const ProfilePage = ({ user, onUpdateProfile, onNavigate }) => {
         setIsEditing(false);
     };
 
-    const renderField = (label, name, value, type = "text") => (
-        <div>
-            <label className="block text-sm font-medium text-gray-700">{label}</label>
-            {isEditing ? (
-                <input
-                    type={type}
-                    name={name}
-                    value={value || ''}
-                    onChange={handleChange}
-                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-            ) : (
-                <p className="mt-1 text-md text-gray-900 bg-gray-50 p-2 rounded-md">{value || 'Not specified'}</p>
-            )}
-        </div>
-    );
-     const renderSelect = (label, name, value, options) => (
-        <div>
-            <label className="block text-sm font-medium text-gray-700">{label}</label>
-            {isEditing ? (
-                <select
-                    name={name}
-                    value={value || ''}
-                    onChange={handleChange}
-                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                >
-                    {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                </select>
-            ) : (
-                 <p className="mt-1 text-md text-gray-900 bg-gray-50 p-2 rounded-md">{value || 'Not specified'}</p>
-            )}
-        </div>
-    );
+    const handleAnalyze = () => {
+        if(selectedJobId) {
+            onAnalyzeResume(selectedJobId);
+        }
+    };
 
+    const renderField = (label, name, type = 'text', options = []) => (
+        <div>
+            <label className="text-sm font-bold text-gray-600 block">{label}</label>
+            {isEditing ? (
+                type === 'textarea' ? (
+                     <textarea name={name} value={formData[name] || ''} onChange={handleChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md" rows="3"></textarea>
+                ) : type === 'select' ? (
+                     <select name={name} value={formData[name] || ''} onChange={handleChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md">
+                        {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                ) : (
+                    <input type={type} name={name} value={formData[name] || ''} onChange={handleChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md" />
+                )
+            ) : (
+                <p className="text-gray-800 bg-gray-50 p-2 rounded-md min-h-[40px]">{formData[name] || 'Not specified'}</p>
+            )}
+        </div>
+    );
+    
+     const Section = ({ title, children }) => (
+        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+            <h3 className="text-xl font-bold text-indigo-600 mb-4 border-b pb-2">{title}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {children}
+            </div>
+        </div>
+    );
 
     return (
         <div className="bg-gray-100 min-h-screen">
-             <header className="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
-                <h1 className="text-2xl font-bold text-indigo-600">My Profile</h1>
-                <div>
-                     <button
-                        onClick={() => onNavigate('dashboard')}
-                        className="mr-4 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                    >
-                        Back to Dashboard
+            <header className="bg-white shadow-sm p-4 flex justify-between items-center">
+                <h1 className="text-2xl font-bold text-gray-800">My Profile</h1>
+                <div className="flex items-center space-x-4">
+                     {isEditing && <button onClick={handleSave} className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Save Changes</button>}
+                    <button onClick={() => setIsEditing(!isEditing)} className="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700">
+                        {isEditing ? 'Cancel' : 'Edit Profile'}
                     </button>
-                    {isEditing ? (
-                        <button onClick={handleSave} className="px-6 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700">
-                            Save Changes
-                        </button>
-                    ) : (
-                        <button onClick={() => setIsEditing(true)} className="px-6 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700">
-                            Edit Profile
-                        </button>
-                    )}
+                    <button onClick={() => onNavigate('dashboard')} className="text-indigo-600 font-semibold hover:text-indigo-800">&larr; Back to Dashboard</button>
                 </div>
             </header>
-            
-            <main className="p-8 max-w-4xl mx-auto">
-                <div className="space-y-8">
-                    {/* Section 1: Basic Information */}
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-xl font-bold mb-4 border-b pb-2">👤 Basic Information</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {renderField("Full Name", "fullName", formData.fullName)}
-                            {renderSelect("Gender", "gender", formData.gender, ["Not specified", "Male", "Female", "Other"])}
-                            {renderField("Date of Birth", "dob", formData.dob, "date")}
-                            {renderField("Email ID", "email", user.email)}
-                            {renderField("Location (City, State)", "location", formData.location)}
-                            {/* Profile picture upload can be added here */}
-                        </div>
-                    </div>
 
-                    {/* Section 2: Education Details */}
-                    <div className="bg-white p-6 rounded-lg shadow">
-                         <h2 className="text-xl font-bold mb-4 border-b pb-2">🎓 Education Details</h2>
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {renderSelect("Current Status", "educationStatus", formData.educationStatus, ["Not specified", "School Student", "Undergraduate", "Postgraduate", "Working Professional"])}
-                            {renderField("College/University Name", "universityName", formData.universityName)}
-                            {renderField("Degree/Program", "degree", formData.degree)}
-                            {renderField("Branch/Specialization", "specialization", formData.specialization)}
-                            {renderField("Year of Study", "studyYear", formData.studyYear)}
-                            {renderField("Graduation Year", "graduationYear", formData.graduationYear)}
-                            {renderField("CGPA / Percentage", "performance", formData.performance)}
-                         </div>
-                    </div>
+            <main className="p-8 space-y-8">
+                <Section title="👤 Basic Information">
+                    {renderField("Full Name", "fullName")}
+                    {renderField("Gender", "gender", "select", ["Not specified", "Male", "Female", "Other"])}
+                    {renderField("Date of Birth", "dob", "date")}
+                    {renderField("Location (City, State)", "location")}
+                </Section>
 
-                    {/* Section 3: Skills & Competencies */}
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-xl font-bold mb-4 border-b pb-2">🛠 Skills & Competencies</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                           {renderField("Technical Skills (comma-separated)", "technicalSkills", formData.technicalSkills)}
-                           {renderField("Soft Skills (comma-separated)", "softSkills", formData.softSkills)}
-                           {renderField("Tools/Software (comma-separated)", "tools", formData.tools)}
-                           {renderField("Languages Known (comma-separated)", "languages", formData.languages)}
-                        </div>
-                    </div>
-                    
-                    {/* Section 4: Career Preferences */}
-                    <div className="bg-white p-6 rounded-lg shadow">
-                         <h2 className="text-xl font-bold mb-4 border-b pb-2">🎯 Career Preferences</h2>
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {renderSelect("Career Path", "careerPath", formData.careerPath, ["Not specified", "Job", "Internship", "Freelance", "Part-time"])}
-                            {renderField("Preferred Roles/Fields", "preferredRoles", formData.preferredRoles)}
-                            {renderField("Preferred Industry", "preferredIndustry", formData.preferredIndustry)}
-                            {renderSelect("Work Mode", "workMode", formData.workMode, ["Not specified", "On-site", "Remote", "Hybrid"])}
-                            {renderField("Preferred Location(s)", "preferredLocation", formData.preferredLocation)}
-                            {renderField("Expected Salary / Stipend", "expectedSalary", formData.expectedSalary)}
-                            {renderField("Joining Availability", "availability", formData.availability)}
-                         </div>
-                    </div>
+                <Section title="🎓 Education Details">
+                     {renderField("Current Status", "educationStatus", "select", ["Not specified", "School Student", "Undergraduate", "Postgraduate", "Working Professional"])}
+                     {renderField("College/University Name", "universityName")}
+                     {renderField("Degree/Program", "degree")}
+                     {renderField("Branch/Specialization", "specialization")}
+                     {renderField("Graduation Year", "graduationYear")}
+                     {renderField("CGPA / Percentage", "academicPerformance")}
+                </Section>
+                
+                 <Section title="🛠 Skills & Competencies">
+                    {renderField("Technical Skills (comma-separated)", "technicalSkills")}
+                    {renderField("Soft Skills (comma-separated)", "softSkills")}
+                    {renderField("Tools/Software (comma-separated)", "toolsSoftware")}
+                    {renderField("Languages Known (comma-separated)", "languages")}
+                </Section>
+                
+                 <Section title="🎯 Career Preferences">
+                    {renderField("Career Path", "careerPath", "select", ["Not specified", "Job", "Internship", "Freelance"])}
+                    {renderField("Preferred Roles/Fields", "preferredRoles")}
+                    {renderField("Preferred Industry", "preferredIndustry")}
+                    {renderField("Work Mode", "workMode", "select", ["Not specified", "On-site", "Remote", "Hybrid"])}
+                    {renderField("Preferred Location(s)", "preferredLocation")}
+                    {renderField("Joining Availability", "joiningAvailability")}
+                </Section>
 
-                    {/* Section 5: Additional Information */}
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-xl font-bold mb-4 border-b pb-2">🔗 Additional Information</h2>
-                        <div className="space-y-4">
-                            {/* Resume Upload can be added here */}
-                            {renderField("Portfolio Links (GitHub, etc.)", "portfolio", formData.portfolio)}
-                            {renderField("LinkedIn Profile Link", "linkedin", formData.linkedin)}
-                            {renderField("Personal Website", "website", formData.website)}
-                        </div>
-                    </div>
+                 <Section title="🔗 Additional Information">
+                    {renderField("Resume (Paste Text)", "resumeText", "textarea")}
+                    {renderField("Portfolio Links (GitHub, Behance, etc.)", "portfolioLinks")}
+                    {renderField("LinkedIn Profile Link", "linkedinProfile")}
+                    {renderField("Personal Website", "personalWebsite")}
+                </Section>
 
+                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <h3 className="text-xl font-bold text-indigo-600 mb-4">🤖 AI Resume Analysis</h3>
+                    <p className="text-gray-600 mb-4">Select a job to see how your resume keywords match up. Make sure your resume text is saved above.</p>
+                     <div className="flex items-center space-x-4">
+                        <select 
+                            value={selectedJobId} 
+                            onChange={(e) => setSelectedJobId(e.target.value)} 
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                        >
+                            <option value="">-- Select a Job to Analyze --</option>
+                            {jobs.map(job => <option key={job.id} value={job.id}>{job.title} at {job.company}</option>)}
+                        </select>
+                        <button 
+                            onClick={handleAnalyze} 
+                            disabled={!selectedJobId || !user.profile.resumeText}
+                            className="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:bg-gray-400"
+                        >
+                            Analyze
+                        </button>
+                    </div>
                 </div>
+
             </main>
         </div>
     );
@@ -157,5 +131,3 @@ const ProfilePage = ({ user, onUpdateProfile, onNavigate }) => {
 
 export default ProfilePage;
 
-
-//test line

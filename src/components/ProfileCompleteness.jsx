@@ -1,7 +1,6 @@
 import React from 'react';
 
 const ProfileCompleteness = ({ profile, onNavigate }) => {
-    // A simple function to calculate completeness percentage
     const calculateCompleteness = () => {
         const fields = [
             'fullName', 'gender', 'dob', 'location',
@@ -13,7 +12,7 @@ const ProfileCompleteness = ({ profile, onNavigate }) => {
         let filledFields = 0;
 
         fields.forEach(field => {
-            if (profile[field] && profile[field] !== 'Not specified') {
+            if (profile[field] && profile[field] !== 'Not specified' && profile[field] !== '') {
                 filledFields++;
             }
         });
@@ -24,7 +23,7 @@ const ProfileCompleteness = ({ profile, onNavigate }) => {
     const completeness = calculateCompleteness();
 
     if (completeness === 100) {
-        return null; // Don't show if profile is complete
+        return null;
     }
 
     return (
@@ -49,4 +48,3 @@ const ProfileCompleteness = ({ profile, onNavigate }) => {
 
 export default ProfileCompleteness;
 
-//test line

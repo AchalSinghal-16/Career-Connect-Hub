@@ -32,7 +32,5 @@ const Modal = ({ isOpen, onClose, title, children, size = 'lg', fullscreen = fal
         </div>
     );
 };
+
 export default Modal;
-
-
-//test line

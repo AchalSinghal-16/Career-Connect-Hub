@@ -18,5 +18,5 @@ const ApplicantCard = ({ applicant, onView }) => (
         </button>
     </div>
 );
-export default ApplicantCard;
 
+export default ApplicantCard;

@@ -4,19 +4,16 @@ import Modal from '../components/Modal';
 const PostJobForm = ({ isOpen, onClose, onPostJob, companyName }) => {
     const [formData, setFormData] = useState({
         title: '',
+        type: 'job',
         location: '',
+        category: '',
+        timings: 'Full-time',
+        requiredExperience: '0',
         about: '',
         eligibility: '',
         recruitmentProcess: '',
         deadlines: '',
-        contact: '',
-        additionalInfo: '',
         requiredSkills: '',
-        requiredExperience: '',
-        type: 'job',
-        category: 'Software Development',
-        timings: 'Full-time',
-        workDays: 'Mon-Fri'
     });
 
     const handleChange = (e) => {
@@ -26,96 +23,86 @@ const PostJobForm = ({ isOpen, onClose, onPostJob, companyName }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const skillsArray = formData.requiredSkills.split(',').map(skill => skill.trim());
-        const newJob = {
-            id: Date.now(),
-            company: companyName,
+        const finalData = {
             ...formData,
-            datePosted: new Date().toISOString(),
-            requiredSkills: skillsArray,
+            company: companyName,
             requiredExperience: parseInt(formData.requiredExperience, 10),
-            applicants: []
+            // Convert comma-separated skills to an array
+            requiredSkills: formData.requiredSkills.split(',').map(skill => skill.trim()).filter(Boolean),
         };
-        onPostJob(newJob);
-        onClose();
-        setFormData({
-            title: '', location: '', about: '', eligibility: '', recruitmentProcess: '', deadlines: '', contact: '', additionalInfo: '', requiredSkills: '', requiredExperience: '', type: 'job', category: 'Software Development', timings: 'Full-time', workDays: 'Mon-Fri'
-        });
+        onPostJob(finalData);
+        onClose(); // Close the modal after posting
     };
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Post a New Opportunity" fullscreen={true}>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                 <div>
-                    <label className="text-sm font-bold text-gray-700 tracking-wide block mb-2">Opportunity Type</label>
-                    <div className="flex items-center space-x-4">
-                        <label className="flex items-center">
-                            <input type="radio" name="type" value="job" checked={formData.type === 'job'} onChange={handleChange} className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500" />
-                            <span className="ml-2 text-gray-700">Full-time Job</span>
-                        </label>
-                        <label className="flex items-center">
-                            <input type="radio" name="type" value="internship" checked={formData.type === 'internship'} onChange={handleChange} className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500" />
-                            <span className="ml-2 text-gray-700">Internship</span>
-                        </label>
-                    </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="text-sm font-bold text-gray-700 tracking-wide">Title</label>
-                        <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="text" name="title" value={formData.title} onChange={handleChange} required />
+                        <label className="text-sm font-bold text-gray-700">Job Title</label>
+                        <input type="text" name="title" onChange={handleChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md" required />
                     </div>
                     <div>
-                        <label className="text-sm font-bold text-gray-700 tracking-wide">Location</label>
-                        <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="text" name="location" value={formData.location} onChange={handleChange} required />
-                    </div>
-                </div>
-                <div>
-                    <label className="text-sm font-bold text-gray-700 tracking-wide">About the {formData.type === 'job' ? 'Job' : 'Internship'}</label>
-                    <textarea className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" name="about" value={formData.about} onChange={handleChange} required />
-                </div>
-                <div>
-                    <label className="text-sm font-bold text-gray-700 tracking-wide">Eligibility</label>
-                    <textarea className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" name="eligibility" value={formData.eligibility} onChange={handleChange} required />
-                </div>
-                <div>
-                    <label className="text-sm font-bold text-gray-700 tracking-wide">Recruitment Process</label>
-                    <textarea className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" name="recruitmentProcess" value={formData.recruitmentProcess} onChange={handleChange} required />
-                </div>
-                <div>
-                    <label className="text-sm font-bold text-gray-700 tracking-wide">Important Dates & Deadlines</label>
-                    <textarea className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" name="deadlines" value={formData.deadlines} onChange={handleChange} required />
-                </div>
-                <div>
-                    <label className="text-sm font-bold text-gray-700 tracking-wide">Contact the Organisers</label>
-                    <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="text" name="contact" value={formData.contact} onChange={handleChange} required />
-                </div>
-                 <div>
-                    <label className="text-sm font-bold text-gray-700 tracking-wide">Additional Information (Perks, etc.)</label>
-                    <textarea className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" name="additionalInfo" value={formData.additionalInfo} onChange={handleChange} />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="text-sm font-bold text-gray-700 tracking-wide">Required Skills (comma-separated)</label>
-                        <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="text" name="requiredSkills" value={formData.requiredSkills} onChange={handleChange} required />
+                        <label className="text-sm font-bold text-gray-700">Type</label>
+                        <select name="type" onChange={handleChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md">
+                            <option value="job">Full-time Job</option>
+                            <option value="internship">Internship</option>
+                        </select>
                     </div>
                     <div>
-                        <label className="text-sm font-bold text-gray-700 tracking-wide">Required Years of Experience</label>
-                        <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="number" name="requiredExperience" value={formData.requiredExperience} onChange={handleChange} required />
+                        <label className="text-sm font-bold text-gray-700">Location</label>
+                        <input type="text" name="location" onChange={handleChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md" required />
                     </div>
                     <div>
-                        <label className="text-sm font-bold text-gray-700 tracking-wide">Category</label>
-                        <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="text" name="category" value={formData.category} onChange={handleChange} required />
+                        <label className="text-sm font-bold text-gray-700">Category</label>
+                        <input type="text" name="category" onChange={handleChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md" required />
                     </div>
-                     <div>
-                        <label className="text-sm font-bold text-gray-700 tracking-wide">Work Days</label>
-                        <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="text" name="workDays" value={formData.workDays} onChange={handleChange} required />
+                    <div>
+                        <label className="text-sm font-bold text-gray-700">Work Timings</label>
+                        <select name="timings" onChange={handleChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md">
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="text-sm font-bold text-gray-700">Required Experience (Years)</label>
+                        <select name="requiredExperience" onChange={handleChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md">
+                            <option value="0">Fresher (0)</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5+</option>
+                        </select>
                     </div>
                 </div>
-                <div className="pt-4">
-                    <button
-                        type="submit"
-                        className="w-full flex justify-center bg-indigo-600 text-gray-100 p-3 rounded-full tracking-wide font-semibold shadow-lg cursor-pointer transition ease-in duration-300 hover:bg-indigo-700"
-                    >
+
+                <div>
+                    <label className="text-sm font-bold text-gray-700">Required Skills (comma-separated)</label>
+                    <input type="text" name="requiredSkills" onChange={handleChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md" required />
+                </div>
+                <div>
+                    <label className="text-sm font-bold text-gray-700">About the Opportunity</label>
+                    <textarea name="about" onChange={handleChange} rows="4" className="w-full mt-1 p-2 border border-gray-300 rounded-md" required></textarea>
+                </div>
+                <div>
+                    <label className="text-sm font-bold text-gray-700">Eligibility Criteria</label>
+                    <textarea name="eligibility" onChange={handleChange} rows="3" className="w-full mt-1 p-2 border border-gray-300 rounded-md" required></textarea>
+                </div>
+                <div>
+                    <label className="text-sm font-bold text-gray-700">Recruitment Process</label>
+                    <textarea name="recruitmentProcess" onChange={handleChange} rows="3" className="w-full mt-1 p-2 border border-gray-300 rounded-md" required></textarea>
+                </div>
+                <div>
+                    <label className="text-sm font-bold text-gray-700">Important Dates & Deadlines</label>
+                    <input type="text" name="deadlines" onChange={handleChange} className="w-full mt-1 p-2 border border-gray-300 rounded-md" required />
+                </div>
+
+                <div className="pt-6 border-t mt-6 flex justify-end space-x-4">
+                     <button type="button" onClick={onClose} className="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300">
+                        Cancel
+                    </button>
+                    <button type="submit" className="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700">
                         Post Opportunity
                     </button>
                 </div>
@@ -123,7 +110,5 @@ const PostJobForm = ({ isOpen, onClose, onPostJob, companyName }) => {
         </Modal>
     );
 };
+
 export default PostJobForm;
-
-
-//test line

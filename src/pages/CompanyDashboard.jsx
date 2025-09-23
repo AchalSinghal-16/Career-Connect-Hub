@@ -1,21 +1,35 @@
 import React, { useState } from 'react';
+import Modal from '../components/Modal';
 import ApplicantCard from '../components/ApplicantCard';
 import PostJobForm from './PostJobForm';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 const BuildingOfficeIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
     </svg>
 );
+
 const TrashIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
     </svg>
 );
 
-const CompanyDashboard = ({ user, jobs, onLogout, onViewApplicant, onPostJob, onRemoveJob }) => {
+const CompanyDashboard = ({ user, jobs, onLogout, onPostJob, onRemoveJob, onViewApplicant }) => {
     const [isPostJobModalOpen, setIsPostJobModalOpen] = useState(false);
-    
+    const [jobToRemove, setJobToRemove] = useState(null);
+
+    if (!user || !user.name) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+                <h1 className="text-2xl font-bold text-gray-700">Loading Company Dashboard...</h1>
+            </div>
+        );
+    }
+
+    const companyJobs = jobs.filter(job => job.company === user.name);
+
     return (
         <>
             <div className="bg-gray-50 min-h-screen">
@@ -35,51 +49,70 @@ const CompanyDashboard = ({ user, jobs, onLogout, onViewApplicant, onPostJob, on
                     </div>
                 </header>
                 <main className="p-4 md:p-8">
-                    <h2 className="text-3xl font-bold text-gray-800 mb-6">Your Active Postings</h2>
+                    <h2 className="text-3xl font-bold text-gray-800 mb-6">Your Active Postings ({companyJobs.length})</h2>
                     <div className="space-y-8">
-                        {jobs.filter(job => job.company === user.name).map(job => (
-                            <div key={job.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-200 relative">
-                                <button
-                                    onClick={() => onRemoveJob(job)}
-                                    className="absolute top-4 right-4 bg-red-100 text-red-600 p-2 rounded-full hover:bg-red-200 transition-colors"
-                                    title="Remove Job"
-                                >
-                                    <TrashIcon />
-                                </button>
-                                <div className="flex items-center mb-2">
-                                    <h3 className="text-2xl font-bold text-gray-800 pr-12">{job.title}</h3>
-                                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ml-4 ${job.type === 'internship' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
-                                        {job.type === 'internship' ? 'Internship' : 'Full-time'}
-                                    </span>
+                        {companyJobs.length > 0 ? (
+                            companyJobs.map(job => (
+                                <div key={job.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-200 relative">
+                                    <button
+                                        onClick={() => setJobToRemove(job)}
+                                        className="absolute top-4 right-4 bg-red-100 text-red-600 p-2 rounded-full hover:bg-red-200 transition-colors"
+                                        title="Remove Job"
+                                    >
+                                        <TrashIcon />
+                                    </button>
+                                    <div className="flex items-center mb-2">
+                                        <h3 className="text-2xl font-bold text-gray-800 pr-12">{job.title}</h3>
+                                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ml-4 ${job.type === 'internship' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
+                                            {job.type === 'internship' ? 'Internship' : 'Full-time'}
+                                        </span>
+                                    </div>
+                                    <p className="text-gray-500 mb-4">{job.location}</p>
+                                    <h4 className="font-bold text-lg text-gray-700 mb-2">Applicants ({(job.applicants || []).length})</h4>
+                                    <div className="space-y-4">
+                                        {(job.applicants || []).length > 0 ? (
+                                            (job.applicants || [])
+                                                .sort((a, b) => b.score - a.score)
+                                                .map(applicant => (
+                                                    <ApplicantCard key={applicant.email} applicant={applicant} onView={() => onViewApplicant(applicant, job)} />
+                                                ))
+                                        ) : (
+                                            <p className="text-gray-600">No applicants yet.</p>
+                                        )}
+                                    </div>
                                 </div>
-                                <p className="text-gray-500 mb-4">{job.location}</p>
-                                <h4 className="font-bold text-lg text-gray-700 mb-2">Applicants ({job.applicants.length})</h4>
-                                <div className="space-y-4">
-                                    {job.applicants.length > 0 ? (
-                                        job.applicants
-                                            .sort((a, b) => b.score - a.score)
-                                            .map(applicant => (
-                                                <ApplicantCard key={applicant.name} applicant={applicant} onView={onViewApplicant} />
-                                            ))
-                                    ) : (
-                                        <p className="text-gray-600">No applicants yet.</p>
-                                    )}
-                                </div>
+                            ))
+                        ) : (
+                             <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-lg">
+                                <h3 className="text-xl font-semibold text-gray-700">No active postings found.</h3>
+                                <p className="text-gray-500 mt-2">Click "Post an Opportunity" to get started.</p>
                             </div>
-                        ))}
+                        )}
                     </div>
                 </main>
             </div>
+            
             <PostJobForm 
                 isOpen={isPostJobModalOpen}
                 onClose={() => setIsPostJobModalOpen(false)}
                 onPostJob={onPostJob}
                 companyName={user.name}
             />
+
+            <ConfirmationModal
+                isOpen={!!jobToRemove}
+                onClose={() => setJobToRemove(null)}
+                onConfirm={() => {
+                    onRemoveJob(jobToRemove.id);
+                    setJobToRemove(null);
+                }}
+                title={`Remove "${jobToRemove?.title}"?`}
+            >
+                Are you sure you want to permanently remove this job posting? This action cannot be undone.
+            </ConfirmationModal>
         </>
     );
 };
+
 export default CompanyDashboard;
 
-
-//test line

@@ -2,121 +2,109 @@ import React, { useState } from 'react';
 import Modal from '../components/Modal';
 import ConfirmationModal from '../components/ConfirmationModal';
 
-// Status Badge Component for visual styling
 const StatusBadge = ({ status }) => {
     const baseClasses = "text-xs font-semibold px-3 py-1 rounded-full inline-block";
     const statusClasses = {
         Applied: "bg-blue-100 text-blue-800",
         'Under Review': "bg-yellow-100 text-yellow-800",
         Shortlisted: "bg-green-100 text-green-800",
-        Rejected: "bg-red-100 text-red-800",
     };
     return <span className={`${baseClasses} ${statusClasses[status] || 'bg-gray-100 text-gray-800'}`}>{status}</span>;
 };
 
-
-const MyApplicationsPage = ({ user, jobs, onNavigate, onWithdraw }) => {
-    const [selectedJob, setSelectedJob] = useState(null);
+const MyApplicationsPage = ({ user, jobs, onNavigate, onWithdraw, onPrepare }) => {
+    const [jobToView, setJobToView] = useState(null);
     const [jobToWithdraw, setJobToWithdraw] = useState(null);
 
-    const appliedJobDetails = user.appliedJobs.map(app => {
-        const jobDetail = jobs.find(j => j.id === app.jobId);
-        return { ...jobDetail, ...app };
-    }).sort((a, b) => new Date(b.appliedDate) - new Date(a.appliedDate)); // Sort by most recent first
-
-    const handleViewDetails = (job) => {
-        setSelectedJob(job);
-    };
-    
-    const handleConfirmWithdraw = () => {
-        if (jobToWithdraw) {
-            onWithdraw(jobToWithdraw.jobId);
-            setJobToWithdraw(null);
-        }
-    };
+    const userApplications = (user.appliedJobs || [])
+        .map(app => {
+            const jobDetails = jobs.find(j => j.id === app.jobId);
+            if (!jobDetails) return null; // Handle case where job is deleted
+            return { ...app, jobDetails };
+        })
+        .filter(Boolean) // Remove nulls
+        .sort((a, b) => new Date(b.appliedDate) - new Date(a.appliedDate));
 
     return (
-        <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">My Applications</h1>
-                        <p className="text-gray-600 mt-1">Track the status of all your submitted applications.</p>
-                    </div>
-                    <button
-                        onClick={() => onNavigate('dashboard')} // <-- BUG FIX: This now works correctly
-                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+        <>
+            <div className="bg-gray-100 min-h-screen">
+                <header className="bg-white shadow-sm p-4 flex justify-between items-center">
+                    <h1 className="text-2xl font-bold text-gray-800">My Applications</h1>
+                    <button 
+                        onClick={() => onNavigate('dashboard')} 
+                        className="text-indigo-600 font-semibold hover:text-indigo-800 transition-colors"
                     >
-                        Back to Dashboard
+                        &larr; Back to Dashboard
                     </button>
-                </div>
-
-                {/* Application Cards */}
-                <div className="space-y-4">
-                    {appliedJobDetails.length > 0 ? (
-                        appliedJobDetails.map(app => (
-                            <div key={app.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                                <div className="flex flex-col sm:flex-row justify-between">
-                                    {/* Job Info */}
-                                    <div className="flex-grow">
-                                        <h3 className="text-xl font-bold text-gray-800">{app.title}</h3>
-                                        <p className="text-indigo-600 font-semibold">{app.company}</p>
-                                        <p className="text-gray-500 text-sm mt-1">{app.location}</p>
-                                    </div>
-                                    {/* Status & Actions */}
-                                    <div className="mt-4 sm:mt-0 sm:text-right flex-shrink-0">
-                                        <p className="text-sm font-semibold text-gray-700">Application Status</p>
-                                        <StatusBadge status={app.status} />
-                                        <div className="mt-3 space-x-2">
-                                            <button onClick={() => handleViewDetails(app)} className="text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-1 px-3 rounded-md">View Job</button>
-                                            <button onClick={() => setJobToWithdraw(app)} className="text-sm bg-red-100 hover:bg-red-200 text-red-800 font-medium py-1 px-3 rounded-md">Withdraw</button>
+                </header>
+                <main className="p-8">
+                    {userApplications.length > 0 ? (
+                        <div className="space-y-6">
+                            {userApplications.map(app => (
+                                <div key={app.jobId} className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                                    <div className="flex flex-col md:flex-row justify-between md:items-center">
+                                        <div>
+                                            <h2 className="text-xl font-bold text-gray-800">{app.jobDetails.title}</h2>
+                                            <p className="text-md text-gray-600">{app.jobDetails.company} - {app.jobDetails.location}</p>
+                                            <p className="text-sm text-gray-500 mt-1">Applied on: {new Date(app.appliedDate).toLocaleDateString()}</p>
+                                        </div>
+                                        <div className="mt-4 md:mt-0 text-left md:text-right">
+                                            <p className="text-sm font-semibold text-gray-500 mb-1">Status</p>
+                                            <StatusBadge status={app.status} />
                                         </div>
                                     </div>
+                                    <div className="border-t my-4"></div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-700 mb-2">Recruitment Process</h4>
+                                        <p className="text-sm text-gray-600 whitespace-pre-wrap">{app.jobDetails.recruitmentProcess}</p>
+                                    </div>
+                                    <div className="mt-4 flex flex-col md:flex-row md:justify-end md:space-x-4 space-y-2 md:space-y-0">
+                                        <button onClick={() => setJobToView(app.jobDetails)} className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-100 rounded-md hover:bg-indigo-200">View Original Job Posting</button>
+                                        <button onClick={() => onPrepare(app.jobId)} className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 rounded-md hover:bg-green-200">Prepare for Interview</button>
+                                        <button onClick={() => setJobToWithdraw(app)} className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200">Withdraw Application</button>
+                                    </div>
                                 </div>
-                                <div className="border-t border-gray-200 mt-4 pt-4">
-                                    <p className="text-sm text-gray-500">
-                                        <strong>Applied on:</strong> {new Date(app.appliedDate).toLocaleDateString()}
-                                    </p>
-                                </div>
-                            </div>
-                        ))
+                            ))}
+                        </div>
                     ) : (
-                        <div className="text-center py-20 bg-white rounded-lg shadow-md">
-                            <h3 className="text-2xl font-semibold text-gray-700">You haven't applied to any jobs yet.</h3>
-                            <p className="text-gray-500 mt-2">Your submitted applications will appear here.</p>
+                        <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-lg">
+                            <h3 className="text-xl font-semibold text-gray-700">No Applications Submitted</h3>
+                            <p className="text-gray-500 mt-2">Your applied jobs will appear here.</p>
                         </div>
                     )}
-                </div>
+                </main>
             </div>
 
-            {/* Modals for viewing job details and confirming withdrawal */}
-            {selectedJob && (
-                 <Modal isOpen={true} onClose={() => setSelectedJob(null)} title={selectedJob.title}>
+            {jobToView && (
+                <Modal isOpen={!!jobToView} onClose={() => setJobToView(null)} title={jobToView.title} fullscreen={true}>
                     <div className="space-y-4">
-                        <p><strong>Company:</strong> {selectedJob.company}</p>
-                        <p><strong>Location:</strong> {selectedJob.location}</p>
-                        <p className="font-bold border-b mt-4 pb-1">About the Opportunity</p>
-                        <p className="text-sm text-gray-600 whitespace-pre-wrap">{selectedJob.details.about}</p>
+                        <h3 className="text-xl font-bold text-gray-800">About the {jobToView.type}</h3>
+                        <p className="text-gray-700 whitespace-pre-wrap">{jobToView.about}</p>
+                        <h3 className="text-xl font-bold text-gray-800">Eligibility</h3>
+                        <p className="text-gray-700 whitespace-pre-wrap">{jobToView.eligibility}</p>
+                        <h3 className="text-xl font-bold text-gray-800">Recruitment Process</h3>
+                        <p className="text-gray-700 whitespace-pre-wrap">{jobToView.recruitmentProcess}</p>
                     </div>
                 </Modal>
             )}
 
             {jobToWithdraw && (
-                <ConfirmationModal
-                    isOpen={true}
-                    title="Confirm Withdrawal"
-                    onConfirm={handleConfirmWithdraw}
-                    onCancel={() => setJobToWithdraw(null)}
+                <ConfirmationModal 
+                    isOpen={!!jobToWithdraw} 
+                    onClose={() => setJobToWithdraw(null)}
+                    onConfirm={() => {
+                        onWithdraw(jobToWithdraw.jobId);
+                        setJobToWithdraw(null);
+                    }}
+                    title={`Withdraw from ${jobToWithdraw.jobDetails.title}?`}
                 >
-                    Are you sure you want to withdraw your application for the position of <strong>{jobToWithdraw.title}</strong> at <strong>{jobToWithdraw.company}</strong>? This action cannot be undone.
+                    Are you sure you want to withdraw your application? This action cannot be undone.
                 </ConfirmationModal>
             )}
-        </div>
+        </>
     );
 };
 
 export default MyApplicationsPage;
 
 
-//test line

@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getInitials } from '../helpers/utils';
+
+const getInitials = (name) => {
+    if (!name) return '';
+    const names = name.split(' ');
+    const initials = names.map(n => n[0]).join('');
+    return initials.toUpperCase();
+};
 
 const ProfileDropdown = ({ user, onLogout, onNavigate }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -24,19 +30,19 @@ const ProfileDropdown = ({ user, onLogout, onNavigate }) => {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg"
+                className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg hover:bg-indigo-700 transition-colors"
             >
                 {getInitials(user.name)}
             </button>
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-20">
                     <div className="px-4 py-2 border-b">
                         <p className="text-sm font-semibold text-gray-800">{user.name}</p>
                         <p className="text-xs text-gray-500">{user.email}</p>
                     </div>
-                    <button onClick={() => handleNavigation('profile')} className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</button>
-                    <button onClick={() => handleNavigation('applications')} className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Applications</button>
-                    <button onClick={() => handleNavigation('settings')} className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</button>
+                    <a href="#" onClick={() => handleNavigation('profile')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</a>
+                    <a href="#" onClick={() => handleNavigation('applications')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Applications</a>
+                    <a href="#" onClick={() => handleNavigation('savedJobs')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Saved Jobs</a>
                     <button
                         onClick={onLogout}
                         className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
@@ -48,7 +54,6 @@ const ProfileDropdown = ({ user, onLogout, onNavigate }) => {
         </div>
     );
 };
+
 export default ProfileDropdown;
 
-
-//test line

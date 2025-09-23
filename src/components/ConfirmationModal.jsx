@@ -14,14 +14,12 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, children }) => {
                         Cancel
                     </button>
                     <button onClick={onConfirm} className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">
-                        Confirm Removal
+                        Confirm
                     </button>
                 </div>
             </div>
         </div>
     );
 };
+
 export default ConfirmationModal;
-
-//test line
-

@@ -39,28 +39,28 @@ const CompanySignUpScreen = ({ onSignUp, onSwitchMode, users }) => {
         <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4">
             <div className="max-w-xl w-full mx-auto">
                 <h1 className="text-4xl font-bold text-center text-indigo-600 mb-2">Register Your Company</h1>
-                <p className="text-center text-gray-600 mb-8">Start finding top talent with Intelli-Hire.</p>
+                <p className="text-center text-gray-600 mb-8">Start finding top talent with Career Connect Hub.</p>
                 <div className="bg-white p-8 rounded-lg shadow-lg">
                     <form onSubmit={handleSignUp} className="space-y-6">
                         <div>
                             <label className="text-sm font-bold text-gray-700 tracking-wide">Company Name</label>
-                            <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="text" name="name" placeholder="Tech Innovators Inc." onChange={handleChange} required />
+                            <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="text" name="name" onChange={handleChange} required />
                         </div>
                         <div>
                             <label className="text-sm font-bold text-gray-700 tracking-wide">Company Email</label>
-                            <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="email" name="email" placeholder="hr@techinnovators.com" onChange={handleChange} required />
+                            <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="email" name="email" onChange={handleChange} required />
                         </div>
                         <div>
                             <label className="text-sm font-bold text-gray-700 tracking-wide">Password</label>
-                            <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="password" name="password" placeholder="••••••••" onChange={handleChange} required />
+                            <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="password" name="password" onChange={handleChange} required />
                         </div>
                         <div>
                             <label className="text-sm font-bold text-gray-700 tracking-wide">Company Website</label>
-                            <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="text" name="website" placeholder="www.techinnovators.com" onChange={handleChange} required />
+                            <input className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" type="text" name="website" onChange={handleChange} required />
                         </div>
                         <div>
                             <label className="text-sm font-bold text-gray-700 tracking-wide">Company Description</label>
-                            <textarea className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" name="description" placeholder="A leading company in cloud solutions and AI." onChange={handleChange} required />
+                            <textarea className="w-full text-base py-2 border-b border-gray-300 focus:outline-none focus:border-indigo-500" name="description" onChange={handleChange} required />
                         </div>
                         
                         {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -84,7 +84,6 @@ const CompanySignUpScreen = ({ onSignUp, onSwitchMode, users }) => {
         </div>
     );
 };
+
 export default CompanySignUpScreen;
 
-
-//test line

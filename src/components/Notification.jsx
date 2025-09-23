@@ -1,22 +1,17 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
-const Notification = ({ message, type, onDismiss }) => {
-    const baseClasses = "fixed top-5 right-5 p-4 rounded-lg shadow-lg text-white z-50 transition-opacity duration-300";
-    const typeClasses = type === 'success' ? 'bg-green-500' : 'bg-blue-500';
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            onDismiss();
-        }, 3000);
-        return () => clearTimeout(timer);
-    }, [onDismiss]);
+const Notification = ({ notification }) => {
+    if (!notification) return null;
 
     return (
-        <div className={`${baseClasses} ${typeClasses}`}>
-            {message}
+        <div 
+            key={notification.id} 
+            className="fixed top-5 right-5 p-4 rounded-lg shadow-lg text-white z-[100] bg-green-500 animate-fade-in-out"
+        >
+            {notification.message}
         </div>
     );
 };
+
 export default Notification;
 
-//test line
